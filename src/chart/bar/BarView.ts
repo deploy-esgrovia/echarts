@@ -505,14 +505,9 @@ class BarView extends ChartView {
                 const el = (data.getItemGraphicEl(idx) as Rect);
                 const shape = el && el.shape;
                 return (shape && (
-                    // The result should be consistent with the initial sort by data value.
-                    // Do not support the case that both positive and negative exist.
-                    Math.abs(
-                        baseAxis.isHorizontal()
-                            ? shape.height
-                            : shape.width
-                    )
-                // If data is NaN, shape.xxx may be NaN, so use || 0 here in case
+                    baseAxis.isHorizontal()
+                        ? shape.height
+                        : shape.width
                 )) || 0;
             };
             this._onRendered = () => {

@@ -620,12 +620,12 @@ class SliderZoomView extends DataZoomView {
 
             const textStyleModel = dataZoomModel.getModel('textStyle');
             const handleLabel = dataZoomModel.get('handleLabel') || {};
-            const handleLabelShow = handleLabel.show || false;
+            //const handleLabelShow = handleLabel.show || false;
 
             thisGroup.add(
                 handleLabels[handleIndex] = new graphic.Text({
                 silent: true,
-                invisible: !handleLabelShow,
+                invisible: false,
                 style: createTextStyle(textStyleModel, {
                     x: 0, y: 0, text: '',
                     verticalAlign: 'middle',
@@ -900,8 +900,8 @@ class SliderZoomView extends DataZoomView {
             : normalShow;
         const displayables = this._displayables;
         const handleLabels = displayables.handleLabels;
-        handleLabels[0].attr('invisible', !toShow);
-        handleLabels[1].attr('invisible', !toShow);
+        //handleLabels[0].attr('invisible', false);
+        //handleLabels[1].attr('invisible', false);
 
         // Highlight move handle
         displayables.moveHandle

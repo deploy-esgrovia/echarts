@@ -258,7 +258,7 @@ class BarView extends ChartView {
                 const layout = getLayout[coord.type](data, dataIndex, itemModel);
 
                 if (drawBackground) {
-                    createBackground(dataIndex);
+                    createBackground(dataIndex); // CREATE BACKGROUND
                 }
 
                 // If dataZoom in filteMode: 'empty', the baseValue can be set as NaN in "axisProxy".
@@ -502,13 +502,10 @@ class BarView extends ChartView {
         }
         else {
             const orderMapping = (idx: number) => {
-                const el = (data.getItemGraphicEl(idx) as Rect);
-                const shape = el && el.shape;
-                return (shape && (
-                    baseAxis.isHorizontal()
-                        ? shape.height
-                        : shape.width
-                )) || 0;
+                return data.get(
+                    data.mapDimension(realtimeSortCfg.otherAxis.dim),
+                    idx
+                ) as number;
             };
             this._onRendered = () => {
                 this._updateSortWithinSameData(data, orderMapping, baseAxis, api);
@@ -1228,6 +1225,7 @@ function largePathFindDataIndex(largePath: LargePath, x: number, y: number) {
     return -1;
 }
 
+// CALCULATION OF BACKGROUND SHAPE FOR BAR BACKGROUND
 function createBackgroundShape(
     isHorizontalOrRadial: boolean,
     layout: SectorLayout | RectLayout,

@@ -630,7 +630,7 @@ class SliderZoomView extends DataZoomView {
                     x: 0, y: 0, text: '',
                     verticalAlign: 'middle',
                     align: 'center',
-                    fill: textStyleModel.getTextColor(),
+                    fill: '#999999',
                     font: textStyleModel.getFont()
                 }),
                 z2: 10
@@ -1112,3 +1112,4 @@ function getCursor(orient: LayoutOrient) {
 }
 
 export default SliderZoomView;
+

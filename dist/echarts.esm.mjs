@@ -40841,7 +40841,7 @@ var BarView = /** @class */function (_super) {
       var itemModel = data.getItemModel(dataIndex);
       var layout = getLayout[coord.type](data, dataIndex, itemModel);
       if (drawBackground) {
-        createBackground(dataIndex);
+        createBackground(dataIndex); // CREATE BACKGROUND
       }
       // If dataZoom in filteMode: 'empty', the baseValue can be set as NaN in "axisProxy".
       if (!data.hasValue(dataIndex) || !isValidLayout[coord.type](layout)) {
@@ -41009,9 +41009,7 @@ var BarView = /** @class */function (_super) {
       this._isFirstFrame = false;
     } else {
       var orderMapping_1 = function (idx) {
-        var el = data.getItemGraphicEl(idx);
-        var shape = el && el.shape;
-        return shape && (baseAxis.isHorizontal() ? shape.height : shape.width) || 0;
+        return data.get(data.mapDimension(realtimeSortCfg.otherAxis.dim), idx);
       };
       this._onRendered = function () {
         _this._updateSortWithinSameData(data, orderMapping_1, baseAxis, api);
@@ -41529,6 +41527,7 @@ function largePathFindDataIndex(largePath, x, y) {
   }
   return -1;
 }
+// CALCULATION OF BACKGROUND SHAPE FOR BAR BACKGROUND
 function createBackgroundShape(isHorizontalOrRadial, layout, coord) {
   if (isCoordinateSystemType(coord, 'cartesian2d')) {
     var rectShape = layout;

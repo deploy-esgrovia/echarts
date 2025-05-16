@@ -189,9 +189,9 @@ class Axis {
 
         const alignWithLabel = tickModel.get('alignWithLabel');
 
-        fixOnBandTicksCoords(
+        /*fixOnBandTicksCoords(
             this, ticksCoords, alignWithLabel, opt.clamp
-        );
+        );*/
 
         return ticksCoords;
     }

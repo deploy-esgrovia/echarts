@@ -101,7 +101,7 @@ class BaseBarSeriesModel<Opts extends BaseBarSeriesOption<unknown> = BaseBarSeri
                     // If axis type is category, use tick coords instead
                     if (axis.type === 'category' && dims != null) {
                         const tickCoords = axis.getTicksCoords();
-                        const alignTicksWithLabel = axis.getTickModel().get('alignWithLabel');
+                        const alignTicksWithLabel = false;//axis.getTickModel().get('alignWithLabel');
 
                         let targetTickId = clampData[idx];
                         // The index of rightmost tick of markArea is 1 larger than x1/y1 index

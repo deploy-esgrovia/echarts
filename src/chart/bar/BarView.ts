@@ -736,7 +736,7 @@ class BarView extends ChartView {
                   // Create gradient fill
                 const gradient = new LinearGradient(0, 0, 1, 0, [
                     { offset: 0, color: 'rgba(0, 0, 0, 0.05)' }, // Black with 0.15 opacity on left
-                    { offset: 1, color: 'rgba(255, 255, 255, 0)' }  // White with 0 opacity on right
+                    { offset: 1, color: 'rgba(0, 0, 0, 0)' }  // White with 0 opacity on right
                 ]);
                   // Create stripe rectangle that spans from absolute left + 24px to absolute right
                 const stripeRect = new Rect({

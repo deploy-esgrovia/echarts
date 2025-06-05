@@ -41133,7 +41133,7 @@
               color: 'rgba(0, 0, 0, 0.05)'
             }, {
               offset: 1,
-              color: 'rgba(255, 255, 255, 0)'
+              color: 'rgba(0, 0, 0, 0)'
             } // White with 0 opacity on right
             ]);
             // Create stripe rectangle that spans from absolute left + 24px to absolute right

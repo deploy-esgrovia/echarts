@@ -41130,11 +41130,11 @@
             // Create gradient fill
             var gradient = new LinearGradient$1(0, 0, 1, 0, [{
               offset: 0,
-              color: '#f0f0f0'
+              color: 'rgba(0, 0, 0, 0.05)'
             }, {
               offset: 1,
-              color: '#ffffff'
-            } // White on right
+              color: 'rgba(255, 255, 255, 0)'
+            } // White with 0 opacity on right
             ]);
             // Create stripe rectangle that spans from absolute left + 24px to absolute right
             var stripeRect = new Rect$3({

@@ -733,11 +733,10 @@ class BarView extends ChartView {
             if ('y' in layout && 'height' in layout) {
                 // Calculate Y position based on the stripe index to cover full area including margins
                 const stripeY = coordArea.y + (dataIndex * stripeHeight);
-                
-                // Create gradient fill
+                  // Create gradient fill
                 const gradient = new LinearGradient(0, 0, 1, 0, [
-                    { offset: 0, color: '#f0f0f0' }, // Light gray on left
-                    { offset: 1, color: '#ffffff' }  // White on right
+                    { offset: 0, color: 'rgba(0, 0, 0, 0.05)' }, // Black with 0.15 opacity on left
+                    { offset: 1, color: 'rgba(255, 255, 255, 0)' }  // White with 0 opacity on right
                 ]);
                   // Create stripe rectangle that spans from absolute left + 24px to absolute right
                 const stripeRect = new Rect({

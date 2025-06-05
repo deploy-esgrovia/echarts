@@ -56,15 +56,14 @@ export interface AxisBaseOptionCommon extends ComponentOption,
         show?: boolean;
     };
 
-    axisLabel?: AxisLabelBaseOption;
-
-    axisPointer?: CommonAxisPointerOption;
+    axisLabel?: AxisLabelBaseOption;    axisPointer?: CommonAxisPointerOption;
     axisLine?: AxisLineOption;
     axisTick?: AxisTickOption;
     minorTick?: MinorTickOption;
     splitLine?: SplitLineOption;
     minorSplitLine?: MinorSplitLineOption;
     splitArea?: SplitAreaOption;
+    background?: BackgroundOption;
 
     /**
      * Min value of the axis. can be:
@@ -277,6 +276,11 @@ interface SplitAreaOption {
     interval?: 'auto' | number | ((index:number, value: string) => boolean)
     // colors will display in turn
     areaStyle?: AreaStyleOption<ZRColor[]>
+}
+
+interface BackgroundOption {
+    show?: boolean,
+    color?: ZRColor
 }
 
 export type AxisBaseOption = ValueAxisBaseOption | LogAxisBaseOption

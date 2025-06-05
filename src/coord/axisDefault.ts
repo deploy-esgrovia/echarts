@@ -100,12 +100,15 @@ const defaultOption: AxisBaseOption = {
             width: 1,
             type: 'solid'
         }
-    },
-    splitArea: {
+    },    splitArea: {
         show: false,
         areaStyle: {
             color: ['rgba(250,250,250,0.2)', 'rgba(210,219,238,0.2)']
         }
+    },
+    background: {
+        show: false,
+        color: '#f0f0f0'
     }
 };
 

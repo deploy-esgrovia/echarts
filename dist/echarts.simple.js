@@ -39458,6 +39458,10 @@
         areaStyle: {
           color: ['rgba(250,250,250,0.2)', 'rgba(210,219,238,0.2)']
         }
+      },
+      background: {
+        show: false,
+        color: '#f0f0f0'
       }
     };
     var categoryAxis = merge({
@@ -41192,7 +41196,7 @@
     }
 
     var axisBuilderAttrs = ['axisLine', 'axisTickLabel', 'axisName'];
-    var selfBuilderAttrs = ['splitArea', 'splitLine', 'minorSplitLine'];
+    var selfBuilderAttrs = ['splitArea', 'splitLine', 'minorSplitLine', 'background'];
     var CartesianAxisView = /** @class */function (_super) {
       __extends(CartesianAxisView, _super);
       function CartesianAxisView() {
@@ -41352,6 +41356,57 @@
       },
       splitArea: function (axisView, axisGroup, axisModel, gridModel) {
         rectCoordAxisBuildSplitArea(axisView, axisGroup, axisModel, gridModel);
+      },
+      background: function (axisView, axisGroup, axisModel, gridModel) {
+        var axis = axisModel.axis;
+        if (axis.scale.isBlank()) {
+          return;
+        }
+        var backgroundModel = axisModel.getModel('background');
+        var color = backgroundModel.get('color') || '#f0f0f0';
+        var gridRect = gridModel.coordinateSystem.getRect();
+        var isHorizontal = axis.isHorizontal();
+        var ticksCoords = axis.getTicksCoords({
+          tickModel: axisModel.getModel('splitLine'),
+          clamp: true
+        });
+        if (ticksCoords.length < 2) {
+          return;
+        }
+        // Create alternating background rectangles between split lines
+        for (var i = 1; i < ticksCoords.length; i += 2) {
+          var startCoord = axis.toGlobalCoord(ticksCoords[i - 1].coord);
+          var endCoord = axis.toGlobalCoord(ticksCoords[i].coord);
+          var x = void 0,
+            y = void 0,
+            width = void 0,
+            height = void 0;
+          if (isHorizontal) {
+            x = startCoord;
+            y = gridRect.y;
+            width = endCoord - startCoord;
+            height = gridRect.height;
+          } else {
+            x = gridRect.x;
+            y = startCoord;
+            width = gridRect.width;
+            height = endCoord - startCoord;
+          }
+          var rect = new Rect$1({
+            shape: {
+              x: x,
+              y: y,
+              width: width,
+              height: height
+            },
+            style: {
+              fill: color
+            },
+            silent: true,
+            z: -1 // Render behind other elements
+          });
+          axisGroup.add(rect);
+        }
       }
     };
     var CartesianXAxisView = /** @class */function (_super) {

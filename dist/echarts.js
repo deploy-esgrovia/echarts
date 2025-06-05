@@ -41092,6 +41092,7 @@
         console.log('_createChartAreaBackground called');
         console.log('Coord type:', coord.type);
         console.log('Data count:', data.count());
+        console.log('Is horizontal or radial:', isHorizontalOrRadial);
         // Remove existing chart area background if any
         this._removeChartAreaBackground();
         // Only create background if data exists
@@ -41099,70 +41100,72 @@
           console.log('No data, skipping background creation');
           return;
         }
-        // Get the first data item layout to determine chart area bounds
-        var firstDataIndex = 0;
-        var firstLayout = getLayout[coord.type](data, firstDataIndex);
-        console.log('First layout:', firstLayout);
-        // Create chart area background shape
-        var chartAreaShape;
-        if (isCoordinateSystemType(coord, 'cartesian2d')) {
-          var coordArea = coord.getArea();
-          console.log('Cartesian2D coordArea:', coordArea);
-          // Use the actual coordinate area for the background
-          chartAreaShape = {
-            x: coordArea.x,
-            y: coordArea.y,
-            width: coordArea.width,
-            height: coordArea.height
-          };
-          console.log('Created chartAreaShape (Rect):', chartAreaShape);
-        } else if (isCoordinateSystemType(coord, 'polar')) {
-          var coordArea = coord.getArea();
-          console.log('Polar coordArea:', coordArea);
-          chartAreaShape = {
-            cx: coordArea.cx,
-            cy: coordArea.cy,
-            r0: coordArea.r0 || 0,
-            r: coordArea.r,
-            startAngle: coordArea.startAngle,
-            endAngle: coordArea.endAngle
-          };
-          console.log('Created chartAreaShape (Sector):', chartAreaShape);
+        // Only create stripes for vertical bar charts (cartesian2d and NOT horizontal)
+        if (coord.type !== 'cartesian2d' || isHorizontalOrRadial) {
+          console.log('Not a vertical bar chart, skipping stripe background');
+          return;
         }
-        // Create the chart area background element
-        var ElementClz = coord.type === 'polar' ? Sector$1 : Rect$3;
-        console.log('Creating element with class:', ElementClz.name);
-        this._chartAreaBgEl = new ElementClz({
-          shape: chartAreaShape,
-          style: {
-            fill: '#f0f0f0',
-            opacity: 0.6,
-            stroke: 'none',
-            lineWidth: 0
-          },
-          silent: true,
-          z: -1,
-          z2: -1,
-          zlevel: 0 // Same z-level as chart elements
-        });
-        console.log('Created chart area background element:', this._chartAreaBgEl);
-        console.log('Element shape:', this._chartAreaBgEl.shape);
-        console.log('Element style:', this._chartAreaBgEl.style);
-        console.log('Element z:', this._chartAreaBgEl.z);
-        console.log('Element z2:', this._chartAreaBgEl.z2);
-        console.log('Element zlevel:', this._chartAreaBgEl.zlevel); // Add to group
+        var coordArea = coord.getArea();
+        console.log('Cartesian2D coordArea:', coordArea);
+        // Create a group to hold all stripe elements
+        this._chartAreaBgEl = new Group$4();
+        // Calculate stripe parameters
+        var dataCount = data.count();
+        var leftOffset = 24; // 24px from left as required
+        var stripeWidth = coordArea.width - leftOffset; // From 24px to end of chart
+        console.log('Creating stripes for vertical bars:');
+        console.log('- Data count:', dataCount);
+        console.log('- Left offset:', leftOffset);
+        console.log('- Stripe width:', stripeWidth);
+        // Calculate stripe height - divide total chart area by number of bars to include margins
+        var stripeHeight = coordArea.height / dataCount;
+        // Create stripes for every second bar starting with first (index 0, 2, 4, 6...)
+        for (var dataIndex = 0; dataIndex < dataCount; dataIndex += 2) {
+          var layout = getLayout[coord.type](data, dataIndex);
+          console.log("- Stripe " + (Math.floor(dataIndex / 2) + 1) + " for bar " + dataIndex + ":", layout);
+          // Only create stripes for rectangular layouts (cartesian2d)
+          if ('y' in layout && 'height' in layout) {
+            // Calculate Y position based on the stripe index to cover full area including margins
+            var stripeY = coordArea.y + dataIndex * stripeHeight;
+            // Create gradient fill
+            var gradient = new LinearGradient$1(0, 0, 1, 0, [{
+              offset: 0,
+              color: '#f0f0f0'
+            }, {
+              offset: 1,
+              color: '#ffffff'
+            } // White on right
+            ]);
+            // Create stripe rectangle that spans from absolute left + 24px to absolute right
+            var stripeRect = new Rect$3({
+              shape: {
+                x: 24,
+                y: stripeY,
+                width: coordArea.x + coordArea.width - 24,
+                height: stripeHeight // Full height including margins
+              },
+              style: {
+                fill: gradient,
+                stroke: 'none',
+                lineWidth: 0
+              },
+              silent: true,
+              z: -1000,
+              z2: -1000,
+              zlevel: -10 // Behind everything
+            });
+            console.log("- Created stripe rectangle:", {
+              x: 24,
+              y: stripeY,
+              width: coordArea.x + coordArea.width - 24,
+              height: stripeHeight
+            });
+            this._chartAreaBgEl.add(stripeRect);
+          }
+        }
+        // Add the stripe group to the main group
         group.add(this._chartAreaBgEl);
-        console.log('Added chart area background to group');
-        console.log('Group children count:', group.children().length);
-        console.log('Chart area element parent:', this._chartAreaBgEl.parent);
-        console.log('Chart area element invisible:', this._chartAreaBgEl.invisible);
-        console.log('Chart area element ignore:', this._chartAreaBgEl.ignore);
-        // Force a refresh to make sure the element is rendered
-        this._chartAreaBgEl.dirty();
-        // Try to get the group's transform and clipping info
-        console.log('Group transform:', group.transform);
-        console.log('Group getClipPath:', group.getClipPath());
-        console.log('Group getBoundingRect:', group.getBoundingRect());
+        console.log("Added " + Math.floor(dataCount / 2) + " stripe elements to chart background");
       };
       BarView.prototype._removeChartAreaBackground = function () {
         console.log('_removeChartAreaBackground called, current element:', this._chartAreaBgEl);

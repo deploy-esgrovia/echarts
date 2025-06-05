@@ -85,6 +85,13 @@ export interface BarSeriesOption
         borderRadius?: number | number[]
     }
 
+    /**
+     * Show a gray rectangle behind the chart area.
+     * For horizontal bar chart, this shows rectangle from the first bar's left top corner 
+     * to bottom right corner which is border of the chart area.
+     */
+    background?: boolean
+
     data?: (BarDataItemOption | OptionDataValue | OptionDataValue[])[]
 
     realtimeSort?: boolean
@@ -130,16 +137,12 @@ class BarSeriesModel extends BaseBarSeriesModel<BarSeriesOption> {
 
     brushSelector(dataIndex: number, data: SeriesData, selectors: BrushCommonSelectorsForSeries): boolean {
         return selectors.rect(data.getItemLayout(dataIndex));
-    }
-
-    static defaultOption: BarSeriesOption = inheritDefaultOption(BaseBarSeriesModel.defaultOption, {
+    }    static defaultOption: BarSeriesOption = inheritDefaultOption(BaseBarSeriesModel.defaultOption, {
         // If clipped
         // Only available on cartesian2d
         clip: true,
 
-        roundCap: false,
-
-        showBackground: false,
+        roundCap: false,        showBackground: false,
         backgroundStyle: {
             color: 'rgba(180, 180, 180, 0.2)',
             borderColor: null,
@@ -150,8 +153,9 @@ class BarSeriesModel extends BaseBarSeriesModel<BarSeriesOption> {
             shadowColor: null,
             shadowOffsetX: 0,
             shadowOffsetY: 0,
-            opacity: 1
-        },
+            opacity: 1        },
+
+        background: true,
 
         select: {
             itemStyle: {

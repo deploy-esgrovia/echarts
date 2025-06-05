@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Zero Alignment Test</title>
+    <script src="dist/echarts.js"></script>
+</head>
+<body>
+    <div id="chart" style="width: 800px; height: 400px;"></div>
+    
+    <script>
+    const chart = echarts.init(document.getElementById('chart'));
+    
+    // Test case where zero values should be aligned
+    const option = {
+        title: {
+            text: 'Zero Alignment Test - alignTicks: true'
+        },
+        grid: {
+            right: '20%'
+        },
+        xAxis: {
+            type: 'category',
+            data: ['A', 'B', 'C', 'D', 'E']
+        },
+        yAxis: [
+            {
+                type: 'value',
+                name: 'Left Axis',
+                position: 'left',
+                alignTicks: true,
+                axisLine: { show: true },
+                splitLine: { show: true }
+            },
+            {
+                type: 'value', 
+                name: 'Right Axis',
+                position: 'right',
+                alignTicks: true,
+                axisLine: { show: true },
+                splitLine: { show: true }
+            }
+        ],
+        series: [
+            {
+                name: 'Left Series',
+                type: 'bar',
+                yAxisIndex: 0,
+                data: [-20, -10, 0, 15, 25]  // Range: -20 to 25
+            },
+            {
+                name: 'Right Series', 
+                type: 'line',
+                yAxisIndex: 1,
+                data: [-100, -50, 0, 75, 150]  // Range: -100 to 150
+            }
+        ]
+    };
+    
+    chart.setOption(option);
+    
+    // Log the tick coordinates to verify zero alignment
+    setTimeout(() => {
+        const grid = chart.getModel().getComponent('grid', 0);
+        const leftAxis = grid.coordinateSystem.getAxis('y', 0);
+        const rightAxis = grid.coordinateSystem.getAxis('y', 1);
+        
+        console.log('Left axis ticks:', leftAxis.scale.getTicks().map(t => t.value));
+        console.log('Right axis ticks:', rightAxis.scale.getTicks().map(t => t.value));
+        
+        // Check if zero values are at the same y-coordinate
+        const leftZeroCoord = leftAxis.dataToCoord(0);
+        const rightZeroCoord = rightAxis.dataToCoord(0);
+        
+        console.log('Left zero coordinate:', leftZeroCoord);
+        console.log('Right zero coordinate:', rightZeroCoord);
+        console.log('Zero alignment difference:', Math.abs(leftZeroCoord - rightZeroCoord));
+        
+        if (Math.abs(leftZeroCoord - rightZeroCoord) < 1) {
+            console.log('✓ Zero values are properly aligned');
+        } else {
+            console.log('✗ Zero values are NOT aligned - this is the issue to fix');
+        }
+    }, 100);
+    </script>
+</body>
+</html>

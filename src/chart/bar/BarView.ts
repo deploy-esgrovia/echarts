@@ -130,6 +130,8 @@ class BarView extends ChartView {
 
     private _backgroundEls: (Rect | Sector)[];
 
+    private _chartAreaBgEl: Rect | Sector;
+
     private _model: BarSeriesModel;
 
     private _progressiveEls: Element[];
@@ -188,14 +190,13 @@ class BarView extends ChartView {
             this._isLargeDraw = isLargeDraw;
             this._clear();
         }
-    }
-
-    private _renderNormal(
+    }    private _renderNormal(
         seriesModel: BarSeriesModel,
         ecModel: GlobalModel,
         api: ExtensionAPI,
         payload: Payload
     ): void {
+        console.log('_renderNormal called for bar chart');
         const group = this.group;
         const data = seriesModel.getData();
         const oldData = this._data;
@@ -446,16 +447,23 @@ class BarView extends ChartView {
                 const el = oldData.getItemGraphicEl(dataIndex) as Path;
                 el && removeElementWithFadeOut(el, seriesModel, dataIndex);
             })
-            .execute();
-
-        const bgGroup = this._backgroundGroup || (this._backgroundGroup = new Group());
+            .execute();        const bgGroup = this._backgroundGroup || (this._backgroundGroup = new Group());
         bgGroup.removeAll();
 
         for (let i = 0; i < bgEls.length; ++i) {
             bgGroup.add(bgEls[i]);
         }
         group.add(bgGroup);
-        this._backgroundEls = bgEls;
+        this._backgroundEls = bgEls;        // Handle chart area background
+        const enableChartAreaBackground = seriesModel.get('background', true);
+        console.log('Bar chart area background check:', enableChartAreaBackground);
+        if (enableChartAreaBackground) {
+            console.log('Creating chart area background');
+            this._createChartAreaBackground(coord, isHorizontalOrRadial, data, group);
+        } else {
+            console.log('Removing chart area background');
+            this._removeChartAreaBackground();
+        }
 
         this._data = data;
     }
@@ -673,6 +681,96 @@ class BarView extends ChartView {
     private _removeBackground(): void {
         this.group.remove(this._backgroundGroup);
         this._backgroundGroup = null;
+    }    private _createChartAreaBackground(
+        coord: CoordSysOfBar,
+        isHorizontalOrRadial: boolean,
+        data: SeriesData,
+        group: Group
+    ): void {
+        console.log('_createChartAreaBackground called');
+        console.log('Coord type:', coord.type);
+        console.log('Data count:', data.count());
+        
+        // Remove existing chart area background if any
+        this._removeChartAreaBackground();
+        
+        // Only create background if data exists
+        if (data.count() === 0) {
+            console.log('No data, skipping background creation');
+            return;
+        }        
+        // Get the first data item layout to determine chart area bounds
+        const firstDataIndex = 0;
+        const firstLayout = getLayout[coord.type](data, firstDataIndex);
+        console.log('First layout:', firstLayout);
+          // Create chart area background shape
+        let chartAreaShape: RectShape | SectorShape;
+          if (isCoordinateSystemType<Cartesian2D>(coord, 'cartesian2d')) {
+            const coordArea = coord.getArea();
+            console.log('Cartesian2D coordArea:', coordArea);
+            
+            // Use the actual coordinate area for the background
+            chartAreaShape = {
+                x: coordArea.x,
+                y: coordArea.y,
+                width: coordArea.width,
+                height: coordArea.height
+            } as RectShape;
+            console.log('Created chartAreaShape (Rect):', chartAreaShape);        } else if (isCoordinateSystemType<Polar>(coord, 'polar')) {
+            const coordArea = coord.getArea();
+            console.log('Polar coordArea:', coordArea);
+            chartAreaShape = {
+                cx: coordArea.cx,
+                cy: coordArea.cy,
+                r0: coordArea.r0 || 0,
+                r: coordArea.r,
+                startAngle: coordArea.startAngle,
+                endAngle: coordArea.endAngle
+            } as SectorShape;
+            console.log('Created chartAreaShape (Sector):', chartAreaShape);
+        }
+        
+        // Create the chart area background element
+        const ElementClz = coord.type === 'polar' ? Sector : Rect;
+        console.log('Creating element with class:', ElementClz.name);        this._chartAreaBgEl = new ElementClz({
+            shape: chartAreaShape as any,
+            style: {
+                fill: '#f0f0f0', // Gray background color
+                opacity: 0.6, // Semi-transparent
+                stroke: 'none', // No border
+                lineWidth: 0
+            },
+            silent: true,
+            z: -1, // Behind chart elements
+            z2: -1, // Behind chart elements
+            zlevel: 0 // Same z-level as chart elements
+        });console.log('Created chart area background element:', this._chartAreaBgEl);
+        console.log('Element shape:', this._chartAreaBgEl.shape);
+        console.log('Element style:', this._chartAreaBgEl.style);
+        console.log('Element z:', this._chartAreaBgEl.z);
+        console.log('Element z2:', this._chartAreaBgEl.z2);
+        console.log('Element zlevel:', this._chartAreaBgEl.zlevel);        // Add to group
+        group.add(this._chartAreaBgEl);
+        console.log('Added chart area background to group');
+        console.log('Group children count:', group.children().length);
+        console.log('Chart area element parent:', this._chartAreaBgEl.parent);
+        console.log('Chart area element invisible:', this._chartAreaBgEl.invisible);
+        console.log('Chart area element ignore:', this._chartAreaBgEl.ignore);
+        
+        // Force a refresh to make sure the element is rendered
+        this._chartAreaBgEl.dirty();
+        
+        // Try to get the group's transform and clipping info
+        console.log('Group transform:', group.transform);
+        console.log('Group getClipPath:', group.getClipPath());
+        console.log('Group getBoundingRect:', group.getBoundingRect());
+    }    private _removeChartAreaBackground(): void {
+        console.log('_removeChartAreaBackground called, current element:', this._chartAreaBgEl);
+        if (this._chartAreaBgEl) {
+            this._chartAreaBgEl.parent && this._chartAreaBgEl.parent.remove(this._chartAreaBgEl);
+            this._chartAreaBgEl = null;
+            console.log('Chart area background removed');
+        }
     }
 }
 

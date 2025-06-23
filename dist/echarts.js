@@ -34016,10 +34016,8 @@
             tickValue: tickVal
           };
         }, this);
-        tickModel.get('alignWithLabel');
-        /*fixOnBandTicksCoords(
-            this, ticksCoords, alignWithLabel, opt.clamp
-        );*/
+        var alignWithLabel = tickModel.get('alignWithLabel');
+        fixOnBandTicksCoords(this, ticksCoords, alignWithLabel, opt.clamp);
         return ticksCoords;
       };
       Axis.prototype.getMinorTicksCoords = function () {
@@ -34088,6 +34086,72 @@
       var margin = size / len / 2;
       extent[0] += margin;
       extent[1] -= margin;
+    }
+    // If axis has labels [1, 2, 3, 4]. Bands on the axis are
+    // |---1---|---2---|---3---|---4---|.
+    // So the displayed ticks and splitLine/splitArea should between
+    // each data item, otherwise cause misleading (e.g., split tow bars
+    // of a single data item when there are two bar series).
+    // Also consider if tickCategoryInterval > 0 and onBand, ticks and
+    // splitLine/spliteArea should layout appropriately corresponding
+    // to displayed labels. (So we should not use `getBandWidth` in this
+    // case).
+    function fixOnBandTicksCoords(axis, ticksCoords, alignWithLabel, clamp) {
+      var ticksLen = ticksCoords.length;
+      // HARDCODED FIX: Always treat alignWithLabel as true to keep ticks centered
+      // This ensures ticks stay in the middle while markArea positioning works correctly
+      if (!axis.onBand || true || !ticksLen) {
+        // Force alignWithLabel behavior
+        return;
+      }
+      var axisExtent = axis.getExtent();
+      var last;
+      var diffSize;
+      if (ticksLen === 1) {
+        ticksCoords[0].coord = axisExtent[0];
+        last = ticksCoords[1] = {
+          coord: axisExtent[1],
+          tickValue: ticksCoords[0].tickValue
+        };
+      } else {
+        var crossLen = ticksCoords[ticksLen - 1].tickValue - ticksCoords[0].tickValue;
+        var shift_1 = (ticksCoords[ticksLen - 1].coord - ticksCoords[0].coord) / crossLen;
+        each$f(ticksCoords, function (ticksItem) {
+          ticksItem.coord -= shift_1 / 2;
+        });
+        var dataExtent = axis.scale.getExtent();
+        diffSize = 1 + dataExtent[1] - ticksCoords[ticksLen - 1].tickValue;
+        last = {
+          coord: ticksCoords[ticksLen - 1].coord + shift_1 * diffSize,
+          tickValue: dataExtent[1] + 1
+        };
+        ticksCoords.push(last);
+      }
+      var inverse = axisExtent[0] > axisExtent[1];
+      // Handling clamp.
+      if (littleThan(ticksCoords[0].coord, axisExtent[0])) {
+        clamp ? ticksCoords[0].coord = axisExtent[0] : ticksCoords.shift();
+      }
+      if (clamp && littleThan(axisExtent[0], ticksCoords[0].coord)) {
+        ticksCoords.unshift({
+          coord: axisExtent[0]
+        });
+      }
+      if (littleThan(axisExtent[1], last.coord)) {
+        clamp ? last.coord = axisExtent[1] : ticksCoords.pop();
+      }
+      if (clamp && littleThan(last.coord, axisExtent[1])) {
+        ticksCoords.push({
+          coord: axisExtent[1]
+        });
+      }
+      function littleThan(a, b) {
+        // Avoid rounding error cause calculated tick coord different with extent.
+        // It may cause an extra unnecessary tick added.
+        a = round$3(a);
+        b = round$3(b);
+        return inverse ? a > b : a < b;
+      }
     }
     var Axis$1 = Axis;
 
@@ -40279,7 +40343,8 @@
               // If axis type is category, use tick coords instead
               if (axis.type === 'category' && dims != null) {
                 var tickCoords = axis.getTicksCoords();
-                var alignTicksWithLabel = false; //axis.getTickModel().get('alignWithLabel');
+                // Always use false for markArea positioning to ensure proper boundary calculation
+                var alignTicksWithLabel = false;
                 var targetTickId = clampData_1[idx];
                 // The index of rightmost tick of markArea is 1 larger than x1/y1 index
                 var isEnd = dims[idx] === 'x1' || dims[idx] === 'y1';
@@ -40330,6 +40395,18 @@
                     // targetTickId is larger than all tick ids in the
                     // visible area, use the rightmost tick coord
                     coord = tickCoords[tickCoords.length - 1].coord;
+                  }
+                }
+                // Calculate boundary coordinates for markArea when alignTicksWithLabel is false
+                if (!alignTicksWithLabel && coord != null) {
+                  var bandWidth = axis.getBandWidth();
+                  var halfBandWidth = bandWidth / 2;
+                  if (isEnd) {
+                    // For end position, position at the right boundary
+                    coord = coord + halfBandWidth;
+                  } else {
+                    // For start position, position at the left boundary  
+                    coord = coord - halfBandWidth;
                   }
                 }
                 pt_1[idx] = axis.toGlobalCoord(coord);

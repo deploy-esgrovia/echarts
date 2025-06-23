@@ -1,2 +1,2 @@
-npm run build:esm  
-yalc publish --push
+npm run release
+yalc push

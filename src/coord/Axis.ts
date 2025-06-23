@@ -189,9 +189,9 @@ class Axis {
 
         const alignWithLabel = tickModel.get('alignWithLabel');
 
-        /*fixOnBandTicksCoords(
+        fixOnBandTicksCoords(
             this, ticksCoords, alignWithLabel, opt.clamp
-        );*/
+        );
 
         return ticksCoords;
     }
@@ -293,7 +293,9 @@ function fixOnBandTicksCoords(
 ) {
     const ticksLen = ticksCoords.length;
 
-    if (!axis.onBand || alignWithLabel || !ticksLen) {
+    // HARDCODED FIX: Always treat alignWithLabel as true to keep ticks centered
+    // This ensures ticks stay in the middle while markArea positioning works correctly
+    if (!axis.onBand || true || !ticksLen) { // Force alignWithLabel behavior
         return;
     }
 

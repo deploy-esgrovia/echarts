@@ -30,7 +30,7 @@ import {
 import GlobalModel from '../../model/Global';
 import Cartesian2D from '../../coord/cartesian/Cartesian2D';
 import SeriesData from '../../data/SeriesData';
-import {dimPermutations} from '../../component/marker/MarkAreaView';
+import { dimPermutations } from '../../component/marker/MarkAreaView';
 import { each } from 'zrender/src/core/util';
 import type Axis2D from '../../coord/cartesian/Axis2D';
 
@@ -83,7 +83,7 @@ class BaseBarSeriesModel<Opts extends BaseBarSeriesOption<unknown> = BaseBarSeri
     type = BaseBarSeriesModel.type;
 
     getInitialData(option: Opts, ecModel: GlobalModel): SeriesData {
-        return createSeriesData(null, this, {useEncodeDefaulter: true});
+        return createSeriesData(null, this, { useEncodeDefaulter: true });
     }
 
     getMarkerPosition(
@@ -96,12 +96,12 @@ class BaseBarSeriesModel<Opts extends BaseBarSeriesOption<unknown> = BaseBarSeri
             // PENDING if clamp ?
             const clampData = coordSys.clampData(value);
             const pt = coordSys.dataToPoint(clampData);
-            if (startingAtTick) {
-                each(coordSys.getAxes(), function (axis: Axis2D, idx: number) {
+            if (startingAtTick) {                each(coordSys.getAxes(), function (axis: Axis2D, idx: number) {
                     // If axis type is category, use tick coords instead
                     if (axis.type === 'category' && dims != null) {
                         const tickCoords = axis.getTicksCoords();
-                        const alignTicksWithLabel = false;//axis.getTickModel().get('alignWithLabel');
+                        // Always use false for markArea positioning to ensure proper boundary calculation
+                        const alignTicksWithLabel = false;
 
                         let targetTickId = clampData[idx];
                         // The index of rightmost tick of markArea is 1 larger than x1/y1 index
@@ -165,6 +165,21 @@ class BaseBarSeriesModel<Opts extends BaseBarSeriesOption<unknown> = BaseBarSeri
                                 coord = tickCoords[tickCoords.length - 1].coord;
                             }
                         }
+
+                        // Calculate boundary coordinates for markArea when alignTicksWithLabel is false
+                        if (!alignTicksWithLabel && coord != null) {
+                            const bandWidth = axis.getBandWidth();
+                            const halfBandWidth = bandWidth / 2;
+                            
+                            if (isEnd) {
+                                // For end position, position at the right boundary
+                                coord = coord + halfBandWidth;
+                            } else {
+                                // For start position, position at the left boundary  
+                                coord = coord - halfBandWidth;
+                            }
+                        }
+                        
                         pt[idx] = axis.toGlobalCoord(coord);
                     }
                 });

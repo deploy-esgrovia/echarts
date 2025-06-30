@@ -17,12 +17,12 @@
 * under the License.
 */
 
-import Path, {PathProps} from 'zrender/src/graphic/Path';
+import Path, { PathProps } from 'zrender/src/graphic/Path';
 import Group from 'zrender/src/graphic/Group';
-import {extend, each, map} from 'zrender/src/core/util';
-import {BuiltinTextPosition} from 'zrender/src/core/types';
-import {SectorProps} from 'zrender/src/graphic/shape/Sector';
-import {RectProps} from 'zrender/src/graphic/shape/Rect';
+import { extend, each, map } from 'zrender/src/core/util';
+import { BuiltinTextPosition } from 'zrender/src/core/types';
+import { SectorProps } from 'zrender/src/graphic/shape/Sector';
+import { RectProps } from 'zrender/src/graphic/shape/Rect';
 import {
     Rect,
     Sector,
@@ -35,11 +35,11 @@ import {
 import { getECData } from '../../util/innerStore';
 import { setStatesStylesFromModel, toggleHoverEmphasis } from '../../util/states';
 import { setLabelStyle, getLabelStatesModels, setLabelValueAnimation, labelInner } from '../../label/labelStyle';
-import {throttle} from '../../util/throttle';
-import {createClipPath} from '../helper/createClipPathFromCoordSys';
+import { throttle } from '../../util/throttle';
+import { createClipPath } from '../helper/createClipPathFromCoordSys';
 import Sausage from '../../util/shape/sausage';
 import ChartView from '../../view/Chart';
-import SeriesData, {DefaultDataVisual} from '../../data/SeriesData';
+import SeriesData, { DefaultDataVisual } from '../../data/SeriesData';
 import GlobalModel from '../../model/Global';
 import ExtensionAPI from '../../core/ExtensionAPI';
 import {
@@ -52,7 +52,7 @@ import {
     ParsedValue,
     ECElement
 } from '../../util/types';
-import BarSeriesModel, {BarDataItemOption, PolarBarLabelPosition} from './BarSeries';
+import BarSeriesModel, { BarDataItemOption, PolarBarLabelPosition } from './BarSeries';
 import type Axis2D from '../../coord/cartesian/Axis2D';
 import type Cartesian2D from '../../coord/cartesian/Cartesian2D';
 import type Polar from '../../coord/polar/Polar';
@@ -61,12 +61,12 @@ import { isCoordinateSystemType } from '../../coord/CoordinateSystem';
 import { getDefaultLabel, getDefaultInterpolatedLabel } from '../helper/labelHelper';
 import OrdinalScale from '../../scale/Ordinal';
 import SeriesModel from '../../model/Series';
-import {AngleAxisModel, RadiusAxisModel} from '../../coord/polar/AxisModel';
+import { AngleAxisModel, RadiusAxisModel } from '../../coord/polar/AxisModel';
 import CartesianAxisModel from '../../coord/cartesian/AxisModel';
-import {LayoutRect} from '../../util/layout';
-import {EventCallback} from 'zrender/src/core/Eventful';
+import { LayoutRect } from '../../util/layout';
+import { EventCallback } from 'zrender/src/core/Eventful';
 import { warn } from '../../util/log';
-import {createSectorCalculateTextPosition, SectorTextPosition, setSectorTextRotation} from '../../label/sectorLabel';
+import { createSectorCalculateTextPosition, SectorTextPosition, setSectorTextRotation } from '../../label/sectorLabel';
 import { saveOldStyle } from '../../animation/basicTransition';
 import Element from 'zrender/src/Element';
 import { getSectorCornerRadius } from '../helper/sectorHelper';
@@ -191,13 +191,11 @@ class BarView extends ChartView {
             this._isLargeDraw = isLargeDraw;
             this._clear();
         }
-    }    private _renderNormal(
+    } private _renderNormal(
         seriesModel: BarSeriesModel,
         ecModel: GlobalModel,
         api: ExtensionAPI,
-        payload: Payload
-    ): void {
-        console.log('_renderNormal called for bar chart');
+        payload: Payload): void {
         const group = this.group;
         const data = seriesModel.getData();
         const oldData = this._data;
@@ -318,7 +316,7 @@ class BarView extends ChartView {
                     );
                 }
                 else {
-                    initProps(el, {shape: layout} as any, seriesModel, dataIndex);
+                    initProps(el, { shape: layout } as any, seriesModel, dataIndex);
                 }
 
                 data.setItemGraphicEl(dataIndex, el);
@@ -448,7 +446,7 @@ class BarView extends ChartView {
                 const el = oldData.getItemGraphicEl(dataIndex) as Path;
                 el && removeElementWithFadeOut(el, seriesModel, dataIndex);
             })
-            .execute();        const bgGroup = this._backgroundGroup || (this._backgroundGroup = new Group());
+            .execute(); const bgGroup = this._backgroundGroup || (this._backgroundGroup = new Group());
         bgGroup.removeAll();
 
         for (let i = 0; i < bgEls.length; ++i) {
@@ -457,12 +455,9 @@ class BarView extends ChartView {
         group.add(bgGroup);
         this._backgroundEls = bgEls;        // Handle chart area background
         const enableChartAreaBackground = seriesModel.get('background', true);
-        console.log('Bar chart area background check:', enableChartAreaBackground);
         if (enableChartAreaBackground) {
-            console.log('Creating chart area background');
             this._createChartAreaBackground(coord, isHorizontalOrRadial, data, group);
         } else {
-            console.log('Removing chart area background');
             this._removeChartAreaBackground();
         }
 
@@ -592,7 +587,7 @@ class BarView extends ChartView {
 
         let tickNum = Math.max(0, extent[0]);
         const tickMax = Math.min(extent[1], scale.getOrdinalMeta().categories.length - 1);
-        for (;tickNum <= tickMax; ++tickNum) {
+        for (; tickNum <= tickMax; ++tickNum) {
             if (orderInfo.ordinalNumbers[tickNum] !== scale.getRawOrdinalNumber(tickNum)) {
                 return true;
             }
@@ -682,63 +677,48 @@ class BarView extends ChartView {
     private _removeBackground(): void {
         this.group.remove(this._backgroundGroup);
         this._backgroundGroup = null;
-    }    private _createChartAreaBackground(
+    } private _createChartAreaBackground(
         coord: CoordSysOfBar,
         isHorizontalOrRadial: boolean,
         data: SeriesData,
-        group: Group
-    ): void {
-        console.log('_createChartAreaBackground called');
-        console.log('Coord type:', coord.type);
-        console.log('Data count:', data.count());
-        console.log('Is horizontal or radial:', isHorizontalOrRadial);
-        
+        group: Group): void {
+
         // Remove existing chart area background if any
         this._removeChartAreaBackground();
-        
+
         // Only create background if data exists
         if (data.count() === 0) {
-            console.log('No data, skipping background creation');
             return;
-        }
-          // Only create stripes for vertical bar charts (cartesian2d and NOT horizontal)
+        }          // Only create stripes for vertical bar charts (cartesian2d and NOT horizontal)
         if (coord.type !== 'cartesian2d' || isHorizontalOrRadial) {
-            console.log('Not a vertical bar chart, skipping stripe background');
             return;
         }
-        
+
         const coordArea = coord.getArea();
-        console.log('Cartesian2D coordArea:', coordArea);
-        
+
         // Create a group to hold all stripe elements
         this._chartAreaBgEl = new Group();
-        
         // Calculate stripe parameters
         const dataCount = data.count();
         const leftOffset = 24; // 24px from left as required
         const stripeWidth = coordArea.width - leftOffset; // From 24px to end of chart
-          console.log('Creating stripes for vertical bars:');        console.log('- Data count:', dataCount);
-        console.log('- Left offset:', leftOffset);
-        console.log('- Stripe width:', stripeWidth);
-        
+
         // Calculate stripe height - divide total chart area by number of bars to include margins
         const stripeHeight = coordArea.height / dataCount;
-        
         // Create stripes for every second bar starting with first (index 0, 2, 4, 6...)
         for (let dataIndex = 0; dataIndex < dataCount; dataIndex += 2) {
             const layout = getLayout[coord.type](data, dataIndex);
-            console.log(`- Stripe ${Math.floor(dataIndex/2) + 1} for bar ${dataIndex}:`, layout);
-            
+
             // Only create stripes for rectangular layouts (cartesian2d)
             if ('y' in layout && 'height' in layout) {
                 // Calculate Y position based on the stripe index to cover full area including margins
                 const stripeY = coordArea.y + (dataIndex * stripeHeight);
-                  // Create gradient fill
+                // Create gradient fill
                 const gradient = new LinearGradient(0, 0, 1, 0, [
                     { offset: 0, color: 'rgba(0, 0, 0, 0.05)' }, // Black with 0.15 opacity on left
                     { offset: 1, color: 'rgba(0, 0, 0, 0)' }  // White with 0 opacity on right
                 ]);
-                  // Create stripe rectangle that spans from absolute left + 24px to absolute right
+                // Create stripe rectangle that spans from absolute left + 24px to absolute right
                 const stripeRect = new Rect({
                     shape: {
                         x: 24, // Absolute left + 24px (includes labels area)
@@ -750,32 +730,20 @@ class BarView extends ChartView {
                         fill: gradient,
                         stroke: 'none',
                         lineWidth: 0
-                    },                    silent: true,
+                    }, silent: true,
                     z: -1000, // Much further behind to appear behind labels
-                    z2: -1000,
-                    zlevel: -10 // Behind everything
+                    z2: -1000, zlevel: -10 // Behind everything
                 });
-                
-                console.log(`- Created stripe rectangle:`, {
-                    x: 24,
-                    y: stripeY,
-                    width: coordArea.x + coordArea.width - 24,
-                    height: stripeHeight
-                });
-                
+
                 this._chartAreaBgEl.add(stripeRect);
             }
         }
-        
         // Add the stripe group to the main group
         group.add(this._chartAreaBgEl);
-        console.log(`Added ${Math.floor(dataCount/2)} stripe elements to chart background`);
-    }    private _removeChartAreaBackground(): void {
-        console.log('_removeChartAreaBackground called, current element:', this._chartAreaBgEl);
+    } private _removeChartAreaBackground(): void {
         if (this._chartAreaBgEl) {
             this._chartAreaBgEl.parent && this._chartAreaBgEl.parent.remove(this._chartAreaBgEl);
             this._chartAreaBgEl = null;
-            console.log('Chart area background removed');
         }
     }
 }
@@ -1270,7 +1238,7 @@ function createLarge(
     }
 
     const el = new LargePath({
-        shape: {points: data.getLayout('largePoints')},
+        shape: { points: data.getLayout('largePoints') },
         incremental: !!incremental,
         ignoreCoarsePointer: true,
         z2: 1

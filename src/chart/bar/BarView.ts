@@ -700,7 +700,7 @@ class BarView extends ChartView {
         this._chartAreaBgEl = new Group();
         // Calculate stripe parameters
         const dataCount = data.count();
-        const leftOffset = 24; // 24px from left as required
+        const leftOffset = 0; // 24px
         const stripeWidth = coordArea.width - leftOffset; // From 24px to end of chart
 
         // Calculate stripe height - divide total chart area by number of bars to include margins
@@ -721,9 +721,9 @@ class BarView extends ChartView {
                 // Create stripe rectangle that spans from absolute left + 24px to absolute right
                 const stripeRect = new Rect({
                     shape: {
-                        x: 24, // Absolute left + 24px (includes labels area)
+                        x: leftOffset,
                         y: stripeY, // Calculated Y position for full coverage
-                        width: coordArea.x + coordArea.width - 24, // From 24px to absolute right end
+                        width: coordArea.x + coordArea.width - leftOffset,
                         height: stripeHeight // Full height including margins
                     },
                     style: {

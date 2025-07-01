@@ -40811,7 +40811,6 @@ var BarView = /** @class */function (_super) {
     }
   };
   BarView.prototype._renderNormal = function (seriesModel, ecModel, api, payload) {
-    console.log('_renderNormal called for bar chart');
     var group = this.group;
     var data = seriesModel.getData();
     var oldData = this._data;
@@ -40995,12 +40994,9 @@ var BarView = /** @class */function (_super) {
     group.add(bgGroup);
     this._backgroundEls = bgEls; // Handle chart area background
     var enableChartAreaBackground = seriesModel.get('background', true);
-    console.log('Bar chart area background check:', enableChartAreaBackground);
     if (enableChartAreaBackground) {
-      console.log('Creating chart area background');
       this._createChartAreaBackground(coord, isHorizontalOrRadial, data, group);
     } else {
-      console.log('Removing chart area background');
       this._removeChartAreaBackground();
     }
     this._data = data;
@@ -41160,40 +41156,27 @@ var BarView = /** @class */function (_super) {
     this._backgroundGroup = null;
   };
   BarView.prototype._createChartAreaBackground = function (coord, isHorizontalOrRadial, data, group) {
-    console.log('_createChartAreaBackground called');
-    console.log('Coord type:', coord.type);
-    console.log('Data count:', data.count());
-    console.log('Is horizontal or radial:', isHorizontalOrRadial);
     // Remove existing chart area background if any
     this._removeChartAreaBackground();
     // Only create background if data exists
     if (data.count() === 0) {
-      console.log('No data, skipping background creation');
       return;
-    }
-    // Only create stripes for vertical bar charts (cartesian2d and NOT horizontal)
+    } // Only create stripes for vertical bar charts (cartesian2d and NOT horizontal)
     if (coord.type !== 'cartesian2d' || isHorizontalOrRadial) {
-      console.log('Not a vertical bar chart, skipping stripe background');
       return;
     }
     var coordArea = coord.getArea();
-    console.log('Cartesian2D coordArea:', coordArea);
     // Create a group to hold all stripe elements
     this._chartAreaBgEl = new Group$4();
     // Calculate stripe parameters
     var dataCount = data.count();
-    var leftOffset = 24; // 24px from left as required
-    var stripeWidth = coordArea.width - leftOffset; // From 24px to end of chart
-    console.log('Creating stripes for vertical bars:');
-    console.log('- Data count:', dataCount);
-    console.log('- Left offset:', leftOffset);
-    console.log('- Stripe width:', stripeWidth);
+    var leftOffset = 0; // 24px
+    coordArea.width - leftOffset; // From 24px to end of chart
     // Calculate stripe height - divide total chart area by number of bars to include margins
     var stripeHeight = coordArea.height / dataCount;
     // Create stripes for every second bar starting with first (index 0, 2, 4, 6...)
     for (var dataIndex = 0; dataIndex < dataCount; dataIndex += 2) {
       var layout = getLayout[coord.type](data, dataIndex);
-      console.log("- Stripe " + (Math.floor(dataIndex / 2) + 1) + " for bar " + dataIndex + ":", layout);
       // Only create stripes for rectangular layouts (cartesian2d)
       if ('y' in layout && 'height' in layout) {
         // Calculate Y position based on the stripe index to cover full area including margins
@@ -41210,9 +41193,9 @@ var BarView = /** @class */function (_super) {
         // Create stripe rectangle that spans from absolute left + 24px to absolute right
         var stripeRect = new Rect$3({
           shape: {
-            x: 24,
+            x: leftOffset,
             y: stripeY,
-            width: coordArea.x + coordArea.width - 24,
+            width: coordArea.x + coordArea.width - leftOffset,
             height: stripeHeight // Full height including margins
           },
           style: {
@@ -41225,25 +41208,16 @@ var BarView = /** @class */function (_super) {
           z2: -1000,
           zlevel: -10 // Behind everything
         });
-        console.log("- Created stripe rectangle:", {
-          x: 24,
-          y: stripeY,
-          width: coordArea.x + coordArea.width - 24,
-          height: stripeHeight
-        });
         this._chartAreaBgEl.add(stripeRect);
       }
     }
     // Add the stripe group to the main group
     group.add(this._chartAreaBgEl);
-    console.log("Added " + Math.floor(dataCount / 2) + " stripe elements to chart background");
   };
   BarView.prototype._removeChartAreaBackground = function () {
-    console.log('_removeChartAreaBackground called, current element:', this._chartAreaBgEl);
     if (this._chartAreaBgEl) {
       this._chartAreaBgEl.parent && this._chartAreaBgEl.parent.remove(this._chartAreaBgEl);
       this._chartAreaBgEl = null;
-      console.log('Chart area background removed');
     }
   };
   BarView.type = 'bar';

@@ -506,10 +506,13 @@ class BarView extends ChartView {
         }
         else {
             const orderMapping = (idx: number) => {
-                return data.get(
-                    data.mapDimension(realtimeSortCfg.otherAxis.dim),
-                    idx
-                ) as number;
+                const el = (data.getItemGraphicEl(idx) as Rect);
+                const shape = el && el.shape;
+                return (shape && (
+                    baseAxis.isHorizontal()
+                        ? shape.height
+                        : shape.width
+                )) || 0;
             };
             this._onRendered = () => {
                 this._updateSortWithinSameData(data, orderMapping, baseAxis, api);

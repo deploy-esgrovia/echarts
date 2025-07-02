@@ -41032,7 +41032,9 @@ var BarView = /** @class */function (_super) {
       this._isFirstFrame = false;
     } else {
       var orderMapping_1 = function (idx) {
-        return data.get(data.mapDimension(realtimeSortCfg.otherAxis.dim), idx);
+        var el = data.getItemGraphicEl(idx);
+        var shape = el && el.shape;
+        return shape && (baseAxis.isHorizontal() ? shape.height : shape.width) || 0;
       };
       this._onRendered = function () {
         _this._updateSortWithinSameData(data, orderMapping_1, baseAxis, api);

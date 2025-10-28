@@ -18,12 +18,18 @@
 
         "pretty": true,
 
-        "outDir": "lib"
+        "outDir": "lib",
+
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true
     },
     "include": [
         "src/**/*.ts",
         "extension-src/**/*.ts",
         "ssr/client/**/*.ts",
         "test/lib/myTransform/src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
     ]
 }

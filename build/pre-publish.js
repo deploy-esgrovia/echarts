@@ -255,7 +255,9 @@ async function tsCompile(compilerOptionsOverride, srcPathList) {
     let compilerOptions = {
         ...tsConfig.compilerOptions,
         ...compilerOptionsOverride,
-        sourceMap: false
+        sourceMap: false,
+        skipLibCheck: true,
+        skipDefaultLibCheck: true
     };
 
     runTsCompile(ts, compilerOptions, srcPathList);

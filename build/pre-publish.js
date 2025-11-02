@@ -228,7 +228,19 @@ async function runTsCompile(localTs, compilerOptions, srcPathList) {
         .getPreEmitDiagnostics(program)
         .concat(emitResult.diagnostics);
 
-    allDiagnostics.forEach(diagnostic => {
+    // Filter out diagnostics from node_modules
+    let filteredDiagnostics = allDiagnostics.filter(diagnostic => {
+        if (diagnostic.file) {
+            const fileName = diagnostic.file.fileName;
+            // Skip errors from node_modules
+            if (fileName.includes('node_modules')) {
+                return false;
+            }
+        }
+        return true;
+    });
+
+    filteredDiagnostics.forEach(diagnostic => {
         if (diagnostic.file) {
             let {line, character} = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
             let message = localTs.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -238,7 +250,7 @@ async function runTsCompile(localTs, compilerOptions, srcPathList) {
             console.log(chalk.red(localTs.flattenDiagnosticMessageText(diagnostic.messageText, '\n')));
         }
     });
-    if (allDiagnostics.length > 0) {
+    if (filteredDiagnostics.length > 0) {
         throw new Error('TypeScript Compile Failed')
     }
 }

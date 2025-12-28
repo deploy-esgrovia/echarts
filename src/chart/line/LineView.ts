@@ -619,6 +619,7 @@ class LineView extends ChartView {
     _coordSys: Cartesian2D | Polar;
 
     _endLabel: graphic.Text;
+    _endLabelGuideline: graphic.Polyline;
 
     _polyline: ECPolyline;
     _polygon: ECPolygon;
@@ -1206,6 +1207,32 @@ class LineView extends ChartView {
                 (polyline as ECElement).disableLabelAnimation = true;
             }
 
+            // Create guideline for endLabel (hardcoded for now)
+            let guideline = this._endLabelGuideline;
+            if (!guideline) {
+                guideline = this._endLabelGuideline = new graphic.Polyline({
+                    shape: {
+                        points: []
+                    },
+                    style: {
+                        stroke: '#666',  // GRAY COLOR - VISIBLE!
+                        lineWidth: 1,    // Thin line
+                        opacity: 0.8,
+                        fill: null
+                    },
+                    z2: 199,  // Just below endLabel
+                    silent: true,
+                    ignoreClip: true
+                });
+                this._lineGroup.add(guideline);
+                // Start hidden - will show after animation
+                guideline.hide();
+            }
+            else {
+                // Hide guideline when animation starts again
+                guideline.hide();
+            }
+
             // Find last non-NaN data to display data
             const dataIndex = getLastIndexNotNull(points);
             if (dataIndex >= 0) {
@@ -1231,6 +1258,11 @@ class LineView extends ChartView {
         else if (this._endLabel) {
             this._polyline.removeTextContent();
             this._endLabel = null;
+            // Also remove guideline
+            if (this._endLabelGuideline) {
+                this._lineGroup.remove(this._endLabelGuideline);
+                this._endLabelGuideline = null;
+            }
         }
     }
 
@@ -1252,6 +1284,11 @@ class LineView extends ChartView {
             if (percent < 1 && animationRecord.originalX == null) {
                 animationRecord.originalX = endLabel.x;
                 animationRecord.originalY = endLabel.y;
+            }
+
+            // Hide guideline during animation
+            if (percent < 1 && this._endLabelGuideline) {
+                this._endLabelGuideline.hide();
             }
 
             const points = data.getLayout('points');
@@ -1286,22 +1323,62 @@ class LineView extends ChartView {
                         x: pt[0] + distanceX,
                         y: pt[1] + distanceY
                     });
+                    // Update guideline position - only show after animation completes
+                    if (percent >= 1 && this._endLabelGuideline) {
+                        const guideline = this._endLabelGuideline;
+                        // Use requestAnimationFrame to get position AFTER labelLayout
+                        requestAnimationFrame(() => {
+                            // Get actual label position after labelLayout
+                            const labelX = endLabel.x;
+                            const labelY = endLabel.y;
+                            const horizontalDist = labelX - pt[0];
+                            const gap = horizontalDist * 0.2;
+                            // Create Z-shaped guideline with 20% gap on both ends
+                            const guidelinePoints = [
+                                [pt[0], pt[1]],                  // Start at data point
+                                [pt[0] + gap, pt[1]],            // Horizontal right
+                                [pt[0] + gap, labelY],           // Vertical to label height
+                                [labelX - gap, labelY]           // Horizontal to label
+                            ];
+                            guideline.setShape({ points: guidelinePoints });
+                            guideline.show();
+                        });
+                    }
                     valueAnimation && (value = seriesModel.getRawValue(indices[0]) as ParsedValue);
                 }
                 else {
                     const pt = polyline.getPointOn(xOrY, dim);
-                    pt && endLabel.attr({
-                        x: pt[0] + distanceX,
-                        y: pt[1] + distanceY
-                    });
-
-                    const startValue = seriesModel.getRawValue(indices[0]) as ParsedValue;
-                    const endValue = seriesModel.getRawValue(indices[1]) as ParsedValue;
-                    valueAnimation && (value = modelUtil.interpolateRawValues(
-                        data, precision, startValue, endValue, dataIndexRange.t
-                    ) as ParsedValue);
+                    if (pt) {
+                        endLabel.attr({
+                            x: pt[0] + distanceX,
+                            y: pt[1] + distanceY
+                        });
+                        // Update guideline position - only show after animation completes
+                        if (percent >= 1 && this._endLabelGuideline) {
+                            const guideline = this._endLabelGuideline;
+                            // Use requestAnimationFrame to get position AFTER labelLayout
+                            requestAnimationFrame(() => {
+                                // Get actual label position after labelLayout
+                                const labelX = endLabel.x;
+                                const labelY = endLabel.y;
+                                // Create L-shaped guideline: horizontal from data point, then vertical to label
+                                const guidelinePoints = [
+                                    [pt[0], pt[1]],           // Start at data point
+                                    [labelX, pt[1]],          // Horizontal to label X
+                                    [labelX, labelY]          // Vertical to label Y
+                                ];
+                                guideline.setShape({ points: guidelinePoints });
+                                guideline.show();
+                            });
+                        }
+                        
+                        valueAnimation && (value = modelUtil.interpolateRawValues(
+                            data, precision, seriesModel.getRawValue(indices[0]) as ParsedValue,
+                            seriesModel.getRawValue(indices[1]) as ParsedValue, dataIndexRange.t
+                        ) as ParsedValue);
+                    }
+                    animationRecord.lastFrameIndex = indices[0];
                 }
-                animationRecord.lastFrameIndex = indices[0];
             }
             else {
                 // If diff <= 0, which is the range is not found(Include NaN)
@@ -1313,6 +1390,27 @@ class LineView extends ChartView {
                     x: pt[0] + distanceX,
                     y: pt[1] + distanceY
                 });
+                // Update guideline position - only show after animation completes
+                if (percent >= 1 && this._endLabelGuideline) {
+                    const guideline = this._endLabelGuideline;
+                    // Use requestAnimationFrame to get position AFTER labelLayout
+                    requestAnimationFrame(() => {
+                        // Get actual label position after labelLayout
+                        const labelX = endLabel.x;
+                        const labelY = endLabel.y;
+                        const horizontalDist = labelX - pt[0];
+                        const gap = horizontalDist * 0.2;
+                        // Create Z-shaped guideline with 20% gap on both ends
+                        const guidelinePoints = [
+                            [pt[0], pt[1]],                  // Start at data point
+                            [pt[0] + gap, pt[1]],            // Horizontal right
+                            [pt[0] + gap, labelY],           // Vertical to label height
+                            [labelX - gap, labelY]           // Horizontal to label
+                        ];
+                        guideline.setShape({ points: guidelinePoints });
+                        guideline.show();
+                    });
+                }
             }
             if (valueAnimation) {
                 const inner = labelInner(endLabel);
@@ -1466,6 +1564,7 @@ class LineView extends ChartView {
             this._points =
             this._stackedOnPoints =
             this._endLabel =
+            this._endLabelGuideline =
             this._data = null;
     }
 }

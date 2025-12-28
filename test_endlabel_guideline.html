@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test EndLabel Guideline</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #main {
+            width: 900px;
+            height: 600px;
+            border: 1px solid #ccc;
+        }
+        .info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>Test: EndLabel Guideline (Pomocná čára k endlabel)</h2>
+        <p>Pomocná šedá čára by se měla zobrazit až po dokončení animace spojující koncový bod grafu s textem.</p>
+    </div>
+    <div id="main"></div>
+    
+    <script src="./dist/echarts.js"></script>
+    <script>
+        var chart = echarts.init(document.getElementById('main'));
+        
+        // Generate test data
+        var xData = [];
+        var data1 = [];
+        var data2 = [];
+        var data3 = [];
+        var data4 = [];
+        var data5 = [];
+        
+        for (var i = 0; i < 20; i++) {
+            xData.push('Point ' + i);
+            data1.push(Math.round(Math.random() * 100 + 50));
+            data2.push(Math.round(Math.random() * 80 + 100));
+            data3.push(Math.round(Math.random() * 60 + 150));
+            data4.push(Math.round(Math.random() * 90 + 80));
+            data5.push(Math.round(Math.random() * 70 + 120));
+        }
+        
+        var option = {
+            title: {
+                text: 'Line Chart with EndLabel Guidelines',
+                subtext: 'Pomocné čáry se zobrazí po animaci'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['Health/medical sciences', 'General advancement', 'Environment', 'Energy', 'Total'],
+                top: 40
+            },
+            grid: {
+                left: '3%',
+                right: '15%',
+                bottom: '3%',
+                top: 100,
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: xData
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name: 'Health/medical sciences',
+                    type: 'line',
+                    data: data1,
+                    smooth: true,
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}',
+                        distance: 20
+                    }
+                },
+                {
+                    name: 'General advancement',
+                    type: 'line',
+                    data: data2,
+                    smooth: true,
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}',
+                        distance: 20
+                    }
+                },
+                {
+                    name: 'Environment',
+                    type: 'line',
+                    data: data3,
+                    smooth: true,
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}',
+                        distance: 20
+                    }
+                },
+                {
+                    name: 'Energy',
+                    type: 'line',
+                    data: data4,
+                    smooth: true,
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}',
+                        distance: 20
+                    }
+                },
+                {
+                    name: 'Total',
+                    type: 'line',
+                    data: data5,
+                    smooth: true,
+                    lineStyle: {
+                        width: 3
+                    },
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}',
+                        distance: 20
+                    }
+                }
+            ],
+            animationDuration: 3000
+        };
+        
+        chart.setOption(option);
+        
+        // Log when animation completes
+        setTimeout(function() {
+            console.log('Animation should be complete - guidelines should now be visible');
+        }, 3500);
+    </script>
+</body>
+</html>

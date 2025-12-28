@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Test EndLabel Guidelines - VISIBLE VERSION</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        #main {
+            width: 1200px;
+            height: 600px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .info {
+            font-family: Arial, sans-serif;
+            color: #666;
+            margin: 10px 0 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>EndLabel Guidelines Test - THICK GRAY LINES (5px, #666)</h1>
+    <div class="info">
+        Guidelines should appear as THICK GRAY lines after animation completes, connecting each line endpoint to its endLabel.
+    </div>
+    <div id="main"></div>
+    
+    <script src="dist/echarts.js"></script>
+    <script type="text/javascript">
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+            title: {
+                text: 'EndLabel Guidelines - Multiple Lines Test'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['Health/medical sciences', 'General advancement', 'Environment', 'Energy', 'General University Funds', 'Total', 'Defence']
+            },
+            grid: {
+                left: '3%',
+                right: '15%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: ['2015', '2016', '2017', '2018', '2019', '2020', '2021']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name: 'Health/medical sciences',
+                    type: 'line',
+                    data: [100, 132, 101, 134, 90, 230, 210],
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}'
+                    }
+                },
+                {
+                    name: 'General advancement',
+                    type: 'line',
+                    data: [220, 182, 191, 234, 290, 330, 310],
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}'
+                    }
+                },
+                {
+                    name: 'Environment',
+                    type: 'line',
+                    data: [150, 232, 201, 154, 190, 330, 410],
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}'
+                    }
+                },
+                {
+                    name: 'Energy',
+                    type: 'line',
+                    data: [320, 332, 301, 334, 390, 330, 320],
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}'
+                    }
+                },
+                {
+                    name: 'General University Funds',
+                    type: 'line',
+                    data: [820, 932, 901, 934, 1290, 1330, 1320],
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}'
+                    }
+                },
+                {
+                    name: 'Total',
+                    type: 'line',
+                    data: [1620, 1932, 1901, 1934, 2290, 2530, 2720],
+                    lineStyle: {
+                        width: 3
+                    },
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}',
+                        fontWeight: 'bold'
+                    }
+                },
+                {
+                    name: 'Defence',
+                    type: 'line',
+                    data: [50, 82, 91, 134, 190, 430, 610],
+                    endLabel: {
+                        show: true,
+                        formatter: '{a}'
+                    }
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+    </script>
+</body>
+</html>

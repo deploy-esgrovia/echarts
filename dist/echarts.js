@@ -2940,15 +2940,15 @@
     }());
     var Storage$1 = Storage;
 
-    var requestAnimationFrame;
-    requestAnimationFrame = (env$1.hasGlobalWindow
+    var requestAnimationFrame$1;
+    requestAnimationFrame$1 = (env$1.hasGlobalWindow
         && ((window.requestAnimationFrame && window.requestAnimationFrame.bind(window))
             || (window.msRequestAnimationFrame && window.msRequestAnimationFrame.bind(window))
             || window.mozRequestAnimationFrame
             || window.webkitRequestAnimationFrame)) || function (func) {
         return setTimeout(func, 16);
     };
-    var requestAnimationFrame$1 = requestAnimationFrame;
+    var requestAnimationFrame$2 = requestAnimationFrame$1;
 
     var easingFuncs = {
         linear: function (k) {
@@ -5090,11 +5090,11 @@
             this._running = true;
             function step() {
                 if (self._running) {
-                    requestAnimationFrame$1(step);
+                    requestAnimationFrame$2(step);
                     !self._paused && self.update();
                 }
             }
-            requestAnimationFrame$1(step);
+            requestAnimationFrame$2(step);
         };
         Animation.prototype.start = function () {
             if (this._running) {
@@ -37397,7 +37397,7 @@
             }
             if (!finished) {
                 var self_1 = this;
-                requestAnimationFrame$1(function () {
+                requestAnimationFrame$2(function () {
                     self_1._paintList(list, prevList, paintAll, redrawId);
                 });
             }
@@ -39952,6 +39952,30 @@
             polyline.setTextContent(this._endLabel);
             polyline.disableLabelAnimation = true;
           }
+          // Create guideline for endLabel (hardcoded for now)
+          var guideline = this._endLabelGuideline;
+          if (!guideline) {
+            guideline = this._endLabelGuideline = new Polyline$3({
+              shape: {
+                points: []
+              },
+              style: {
+                stroke: '#666',
+                lineWidth: 1,
+                opacity: 0.8,
+                fill: null
+              },
+              z2: 199,
+              silent: true,
+              ignoreClip: true
+            });
+            this._lineGroup.add(guideline);
+            // Start hidden - will show after animation
+            guideline.hide();
+          } else {
+            // Hide guideline when animation starts again
+            guideline.hide();
+          }
           // Find last non-NaN data to display data
           var dataIndex = getLastIndexNotNull(points);
           if (dataIndex >= 0) {
@@ -39969,6 +39993,11 @@
         } else if (this._endLabel) {
           this._polyline.removeTextContent();
           this._endLabel = null;
+          // Also remove guideline
+          if (this._endLabelGuideline) {
+            this._lineGroup.remove(this._endLabelGuideline);
+            this._endLabelGuideline = null;
+          }
         }
       };
       LineView.prototype._endLabelOnDuring = function (percent, clipRect, data, animationRecord, valueAnimation, endLabelModel, coordSys) {
@@ -39980,6 +40009,10 @@
           if (percent < 1 && animationRecord.originalX == null) {
             animationRecord.originalX = endLabel.x;
             animationRecord.originalY = endLabel.y;
+          }
+          // Hide guideline during animation
+          if (percent < 1 && this._endLabelGuideline) {
+            this._endLabelGuideline.hide();
           }
           var points = data.getLayout('points');
           var seriesModel = data.hostModel;
@@ -40001,33 +40034,88 @@
           if (diff >= 1) {
             // diff > 1 && connectNulls, which is on the null data.
             if (diff > 1 && !connectNulls) {
-              var pt = getPointAtIndex(points, indices[0]);
+              var pt_1 = getPointAtIndex(points, indices[0]);
               endLabel.attr({
-                x: pt[0] + distanceX,
-                y: pt[1] + distanceY
+                x: pt_1[0] + distanceX,
+                y: pt_1[1] + distanceY
               });
+              // Update guideline position - only show after animation completes
+              if (percent >= 1 && this._endLabelGuideline) {
+                var guideline_1 = this._endLabelGuideline;
+                // Use requestAnimationFrame to get position AFTER labelLayout
+                requestAnimationFrame(function () {
+                  // Get actual label position after labelLayout
+                  var labelX = endLabel.x;
+                  var labelY = endLabel.y;
+                  var horizontalDist = labelX - pt_1[0];
+                  var gap = horizontalDist * 0.2;
+                  // Create Z-shaped guideline with 20% gap on both ends
+                  var guidelinePoints = [[pt_1[0], pt_1[1]], [pt_1[0] + gap, pt_1[1]], [pt_1[0] + gap, labelY], [labelX - gap, labelY] // Horizontal to label
+                  ];
+                  guideline_1.setShape({
+                    points: guidelinePoints
+                  });
+                  guideline_1.show();
+                });
+              }
               valueAnimation && (value = seriesModel.getRawValue(indices[0]));
             } else {
-              var pt = polyline.getPointOn(xOrY, dim);
-              pt && endLabel.attr({
-                x: pt[0] + distanceX,
-                y: pt[1] + distanceY
-              });
-              var startValue = seriesModel.getRawValue(indices[0]);
-              var endValue = seriesModel.getRawValue(indices[1]);
-              valueAnimation && (value = interpolateRawValues(data, precision, startValue, endValue, dataIndexRange.t));
+              var pt_2 = polyline.getPointOn(xOrY, dim);
+              if (pt_2) {
+                endLabel.attr({
+                  x: pt_2[0] + distanceX,
+                  y: pt_2[1] + distanceY
+                });
+                // Update guideline position - only show after animation completes
+                if (percent >= 1 && this._endLabelGuideline) {
+                  var guideline_2 = this._endLabelGuideline;
+                  // Use requestAnimationFrame to get position AFTER labelLayout
+                  requestAnimationFrame(function () {
+                    // Get actual label position after labelLayout
+                    var labelX = endLabel.x;
+                    var labelY = endLabel.y;
+                    // Create L-shaped guideline: horizontal from data point, then vertical to label
+                    var guidelinePoints = [[pt_2[0], pt_2[1]], [labelX, pt_2[1]], [labelX, labelY] // Vertical to label Y
+                    ];
+                    guideline_2.setShape({
+                      points: guidelinePoints
+                    });
+                    guideline_2.show();
+                  });
+                }
+                valueAnimation && (value = interpolateRawValues(data, precision, seriesModel.getRawValue(indices[0]), seriesModel.getRawValue(indices[1]), dataIndexRange.t));
+              }
+              animationRecord.lastFrameIndex = indices[0];
             }
-            animationRecord.lastFrameIndex = indices[0];
           } else {
             // If diff <= 0, which is the range is not found(Include NaN)
             // Choose the first point or last point.
             var idx = percent === 1 || animationRecord.lastFrameIndex > 0 ? indices[0] : 0;
-            var pt = getPointAtIndex(points, idx);
+            var pt_3 = getPointAtIndex(points, idx);
             valueAnimation && (value = seriesModel.getRawValue(idx));
             endLabel.attr({
-              x: pt[0] + distanceX,
-              y: pt[1] + distanceY
+              x: pt_3[0] + distanceX,
+              y: pt_3[1] + distanceY
             });
+            // Update guideline position - only show after animation completes
+            if (percent >= 1 && this._endLabelGuideline) {
+              var guideline_3 = this._endLabelGuideline;
+              // Use requestAnimationFrame to get position AFTER labelLayout
+              requestAnimationFrame(function () {
+                // Get actual label position after labelLayout
+                var labelX = endLabel.x;
+                var labelY = endLabel.y;
+                var horizontalDist = labelX - pt_3[0];
+                var gap = horizontalDist * 0.2;
+                // Create Z-shaped guideline with 20% gap on both ends
+                var guidelinePoints = [[pt_3[0], pt_3[1]], [pt_3[0] + gap, pt_3[1]], [pt_3[0] + gap, labelY], [labelX - gap, labelY] // Horizontal to label
+                ];
+                guideline_3.setShape({
+                  points: guidelinePoints
+                });
+                guideline_3.show();
+              });
+            }
           }
           if (valueAnimation) {
             var inner = labelInner(endLabel);
@@ -40146,7 +40234,7 @@
             oldData.setItemGraphicEl(idx, null);
           }
         });
-        this._polyline = this._polygon = this._coordSys = this._points = this._stackedOnPoints = this._endLabel = this._data = null;
+        this._polyline = this._polygon = this._coordSys = this._points = this._stackedOnPoints = this._endLabel = this._endLabelGuideline = this._data = null;
       };
       LineView.type = 'line';
       return LineView;

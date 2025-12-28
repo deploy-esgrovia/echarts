@@ -1335,9 +1335,9 @@ class LineView extends ChartView {
                             const gap = horizontalDist * 0.2;
                             // Create Z-shaped guideline with 20% gap on both ends
                             const guidelinePoints = [
-                                [pt[0], pt[1]],                  // Start at data point
-                                [pt[0] + gap, pt[1]],            // Horizontal right
-                                [pt[0] + gap, labelY],           // Vertical to label height
+                                [pt[0] + gap, pt[1]],            // Start with gap from data point
+                                [pt[0] + 2 * gap, pt[1]],        // Horizontal right
+                                [pt[0] + 2 * gap, labelY],       // Vertical to label height
                                 [labelX - gap, labelY]           // Horizontal to label
                             ];
                             guideline.setShape({ points: guidelinePoints });
@@ -1361,11 +1361,14 @@ class LineView extends ChartView {
                                 // Get actual label position after labelLayout
                                 const labelX = endLabel.x;
                                 const labelY = endLabel.y;
-                                // Create L-shaped guideline: horizontal from data point, then vertical to label
+                                const horizontalDist = labelX - pt[0];
+                                const gap = horizontalDist * 0.2;
+                                // Create Z-shaped guideline with gap on both ends
                                 const guidelinePoints = [
-                                    [pt[0], pt[1]],           // Start at data point
-                                    [labelX, pt[1]],          // Horizontal to label X
-                                    [labelX, labelY]          // Vertical to label Y
+                                    [pt[0] + gap, pt[1]],         // Start with gap from data point
+                                    [pt[0] + 2 * gap, pt[1]],     // Horizontal right
+                                    [pt[0] + 2 * gap, labelY],    // Vertical to label height
+                                    [labelX - gap, labelY]        // Horizontal to label
                                 ];
                                 guideline.setShape({ points: guidelinePoints });
                                 guideline.show();
@@ -1402,9 +1405,9 @@ class LineView extends ChartView {
                         const gap = horizontalDist * 0.2;
                         // Create Z-shaped guideline with 20% gap on both ends
                         const guidelinePoints = [
-                            [pt[0], pt[1]],                  // Start at data point
-                            [pt[0] + gap, pt[1]],            // Horizontal right
-                            [pt[0] + gap, labelY],           // Vertical to label height
+                            [pt[0] + gap, pt[1]],            // Start with gap from data point
+                            [pt[0] + 2 * gap, pt[1]],        // Horizontal right
+                            [pt[0] + 2 * gap, labelY],       // Vertical to label height
                             [labelX - gap, labelY]           // Horizontal to label
                         ];
                         guideline.setShape({ points: guidelinePoints });

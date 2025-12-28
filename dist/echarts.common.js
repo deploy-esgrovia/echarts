@@ -39050,7 +39050,7 @@
                   var horizontalDist = labelX - pt_1[0];
                   var gap = horizontalDist * 0.2;
                   // Create Z-shaped guideline with 20% gap on both ends
-                  var guidelinePoints = [[pt_1[0], pt_1[1]], [pt_1[0] + gap, pt_1[1]], [pt_1[0] + gap, labelY], [labelX - gap, labelY] // Horizontal to label
+                  var guidelinePoints = [[pt_1[0] + gap, pt_1[1]], [pt_1[0] + 2 * gap, pt_1[1]], [pt_1[0] + 2 * gap, labelY], [labelX - gap, labelY] // Horizontal to label
                   ];
                   guideline_1.setShape({
                     points: guidelinePoints
@@ -39074,8 +39074,10 @@
                     // Get actual label position after labelLayout
                     var labelX = endLabel.x;
                     var labelY = endLabel.y;
-                    // Create L-shaped guideline: horizontal from data point, then vertical to label
-                    var guidelinePoints = [[pt_2[0], pt_2[1]], [labelX, pt_2[1]], [labelX, labelY] // Vertical to label Y
+                    var horizontalDist = labelX - pt_2[0];
+                    var gap = horizontalDist * 0.2;
+                    // Create Z-shaped guideline with gap on both ends
+                    var guidelinePoints = [[pt_2[0] + gap, pt_2[1]], [pt_2[0] + 2 * gap, pt_2[1]], [pt_2[0] + 2 * gap, labelY], [labelX - gap, labelY] // Horizontal to label
                     ];
                     guideline_2.setShape({
                       points: guidelinePoints
@@ -39108,7 +39110,7 @@
                 var horizontalDist = labelX - pt_3[0];
                 var gap = horizontalDist * 0.2;
                 // Create Z-shaped guideline with 20% gap on both ends
-                var guidelinePoints = [[pt_3[0], pt_3[1]], [pt_3[0] + gap, pt_3[1]], [pt_3[0] + gap, labelY], [labelX - gap, labelY] // Horizontal to label
+                var guidelinePoints = [[pt_3[0] + gap, pt_3[1]], [pt_3[0] + 2 * gap, pt_3[1]], [pt_3[0] + 2 * gap, labelY], [labelX - gap, labelY] // Horizontal to label
                 ];
                 guideline_3.setShape({
                   points: guidelinePoints
